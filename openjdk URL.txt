@@ -1,0 +1,1 @@
+https://github.com/AdoptOpenJDK/openjdk8-upstream-binaries/releases/tag/jdk8u312-b07
