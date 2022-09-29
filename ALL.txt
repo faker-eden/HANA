@@ -1,0 +1,137 @@
+####setenv.sh######
+
+#Heap Memory 설정
+
+DATE=`date +%Y%m%d%H%M%S`
+
+JAVA_OPTS="${JAVA_OPTS} -Xms2048m"
+JAVA_OPTS="${JAVA_OPTS} -Xmx2048m"
+JAVA_OPTS="${JAVA_OPTS} -XX:MetaspaceSize=256m"
+JAVA_OPTS="${JAVA_OPTS} -XX:MaxMetaspaceSize=256m"
+####################################################
+JAVA_OPTS="${JAVA_OPTS} -XX:+UseParallelGC"
+JAVA_OPTS="${JAVA_OPTS} -XX:+UseParallelOldGC"
+JAVA_OPTS="${JAVA_OPTS} -verbose:gc"
+JAVA_OPTS="${JAVA_OPTS} -Xloggc:/logs/tomcat_admin/gclog/tomcat_admin_gc.log.${DATE}"
+JAVA_OPTS="${JAVA_OPTS} -XX:+PrintGCDetails"
+JAVA_OPTS="${JAVA_OPTS} -XX:+PrintGCTimeStamps"
+JAVA_OPTS="${JAVA_OPTS} -XX:+PrintHeapAtGC"
+JAVA_OPTS="${JAVA_OPTS} -XX:+HeapDumpOnOutOfMemoryError"
+JAVA_OPTS="${JAVA_OPTS} -XX:HeapDumpPath=/logs/tomcat_admin/gclog/tomcat_admin_java_pid_$DATE.hprof"
+
+##########################################################
+커널파라미터
+# /etc/sysctl.conf
+
+net.ipv4.neigh.default.unres_qlen=100
+net.ipv4.tcp_keepalive_time = 30
+net.ipv4.tcp_fin_timeout = 10
+net.core.netdev_max_backlog = 2500
+net.ipv4.tcp_retries1 = 2
+net.ipv4.tcp_retries2 = 3
+net.ipv4.ip_local_port_range = 1024 65000
+net.core.rmem_max = 56777216
+net.core.rmem_default = 16777216
+net.core.wmem_max = 56777216
+net.core.wmem_default = 16777216
+net.ipv4.tcp_window_scaling = 1
+net.ipv4.tcp_timestamps = 0
+net.ipv4.tcp_sack = 0
+net.ipv4.tcp_orphan_retries = 0
+
+사용자 limit 값
+# /etc/security/limits.conf
+#
+.....
+
+webAdmin		hard	nofile		65536
+webAdmin		soft	nofile		65536
+
+webAdmin		soft 	nproc 		2047
+webAdmin      	              hard 	nproc 		16384
+
+# End of file
+
+
+###########DB########################
+
+### test.jsp #####
+
+<%@ page import="java.sql.*" contentType="text/html; charset=UTF-8" %>
+<%
+   String DB_URL = "jdbc:postgresql://10.0.1.11:5432/testdata";
+   String DB_USER = "postgres";
+   String DB_PASSWORD= "1234";
+
+   Connection conn;
+   Statement stmt;
+
+   try
+   {
+    Class.forName("org.postgresql.Driver");
+    conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+    stmt = conn.createStatement();
+    conn.close();
+
+    out.println("postgresql connect !!!");
+   }
+   catch(Exception e)
+   {
+      out.println(e.getMessage());
+   }
+%>
+
+
+#####DB 연동###########
+
+Resource name="jdbc/postgres" auth="Container"
+          type="javax.sql.DataSource" driverClassName="org.postgresql.Driver"
+          url="jdbc:postgresql://127.0.0.1:5432/mydb"
+          username="myuser" password="mypasswd"/>
+
+#################################
+
+    <Resource name="jdbc/postgres"
+               auth="Container"
+               type="javax.sql.DataSource"
+               username="root"
+               password="admin@123"
+               driverClassName="org.postgresql.Driver"
+               url="jdbc:postgresql://localhost:3306/mysql"/>
+
+
+###########################
+
+ <%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8" import="java.sql.*"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" " http://www.w3.org/TR/html4/loose.dtd">
+ <html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>DB Connection Test</title>
+</head>
+<body>
+<%
+String DB_URL = "jdbc:postgresql://아이피:3306/데이터베이스";
+String DB_USER = "이름";
+String DB_PASSWORD= "암호";
+Connection conn;
+Statement stmt;
+try {
+ Class.forName("com.postgresql.Driver");
+ conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+ stmt = conn.createStatement();
+ conn.close();
+ out.println("postgresql jdbc test: connect ok!!");
+} catch(Exception e) {
+ out.println(e.getMessage());
+}
+%>
+</body>
+</html>
+
+
+
+
+
+
